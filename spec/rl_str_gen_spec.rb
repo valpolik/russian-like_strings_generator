@@ -18,7 +18,7 @@ describe "rl_str_generator" do
 
 
   it "should not be over 300 symbols" do
-    100000.times do
+    10000.times do
       expect(rl_str_gen.size).to be <= 300
     end
   end
@@ -28,7 +28,8 @@ describe "rl_str_generator" do
     1000.times do
       str = rl_str_gen
       expect(str.size).to be <= 300
-      expect(str.gsub("- ", "").match?(/\A *(?:[^ ]+ +){1,14}[^ ]+ *\z/) ).to be true
+      expect(str.gsub("- ", "").match?(/\A *(?:[^ ]+ +){1,14}[^ ]+ *\z/) )
+      .to be true
     end
   end
 
@@ -95,7 +96,7 @@ describe "rl_str_generator" do
     1000.times do
       expect( rl_str_gen.match(/\b[ьъы]/i) ).to be_nil
     end    
-  end 
+  end
 
 
   it "should not contain capital letters inside words if not an acronym" do
@@ -107,7 +108,7 @@ describe "rl_str_generator" do
         end
       end
     end
-  end  
+  end 
 
 
   it "should  allow acronyms only to 5 letters long" do
@@ -122,7 +123,7 @@ describe "rl_str_generator" do
     1000.times do
       expect( rl_str_gen.match(/ \"?[А-ЯЁ]\b/) ).to be_nil
     end
-  end    
+  end
 
 
   it "should always have a vowel after й at the beginning of the word" do
@@ -158,7 +159,7 @@ describe "rl_str_generator" do
       rl_str_gen.scan(/\b[а-яё]\b/i).each do |word|
         expect(word).to match(/[аявоуиксжб]/i)
       end
-    end    
+    end
   end
 
 
@@ -182,7 +183,7 @@ describe "rl_str_generator" do
           expect( el.match(/[аоуэыияёюе]{3,}/i) ).to be_nil
         end
       end
-    end    
+    end
   end   
 
 
@@ -213,7 +214,7 @@ describe "rl_str_generator" do
       .each do |el|
         unless el.match?(/\A[А-ЯЁ]{2,}\z/)
           found = el.scan(/[аоуэыияёюе]/i).size
-          calc  = (el.size * 0.4).to_i
+          calc  = ( (el.size - el.scan(/[ъь]/i).size) * 0.4 ).to_i
           res   = found >= calc ? ">=#{calc} vowels" : "#{found} vowels"
           expect( [res, el] )
           .to eq( [">=#{calc} vowels", el] )
@@ -223,7 +224,45 @@ describe "rl_str_generator" do
   end
 
 
-  it "should contain ??? vowels in single-syllable word" do
+  it "should contain 5 or less consonants in single-syllable words" do
+    1000.times do
+      rl_str_gen.gsub(/[^а-яё \-]/i, "")
+      .split
+      .reject{|w| w.match?(/\-|([аоуэыияёюе].*[аоуэыияёюе])/i) || 
+        w.match?(/\A[А-ЯЁ]{2,}\z/)}
+      .each do |word|
+        expect(word.size).to be <= 6
+      end
+    end
   end  
 
+
+  it "should allow only я е ё ю after ъ" do
+    1000.times do
+      expect( rl_str_gen.gsub(/\b[А-ЯЁ]{2,}\b/,"").match /ъ[^яюеё]/i ).to be_nil
+    end
+  end
+
+
+  it "should not allow a vowel at the beginning of the word"\
+     "in single-syllable words if they have 3 or more letter" do
+
+    1000.times do
+      rl_str_gen.gsub(/[^а-яё \-]/i, "")
+      .split
+      .reject{|w| w.match?(/\-|([аоуэыияёюе].*[аоуэыияёюе])/i) || 
+        w.match?(/\A[А-ЯЁ]{2,}\z/) || 
+        w.size < 3}
+      .each do |word|
+        expect(word).to match(/\A[^аоуэыияёюе]/i)
+      end
+    end
+  end
+
+
+  it "should forbid Ь and Ъ in acronyms" do
+    1000.times do
+      expect( rl_str_gen.match(/(?=\b[А-ЯЁ]{2,}\b)\b[А-ЯЁ]*[ЪЬ][А-ЯЁ]*\b/) ).to be_nil
+    end
+  end
 end
