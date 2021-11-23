@@ -157,7 +157,7 @@ describe "rl_str_generator" do
   it "should allow only particular one-letter words" do
     1000.times do
       rl_str_gen.scan(/\b[а-яё]\b/i).each do |word|
-        expect(word).to match(/[аявоуиксжб]/i)
+        expect(word).to match(/[аявоуикс]/i)
       end
     end
   end
