@@ -1,7 +1,14 @@
 require 'rspec'
 require_relative '../app/methods'
 
-describe "rl_str_generator" do
+
+describe "nested methods" do
+  it "" do
+  end
+end
+
+
+describe "Resulting sentence" do
 
   it "should return a string" do
     1000.times do
