@@ -140,10 +140,11 @@ def plan_words
   arr = Array.new(rand(2..15)) {{}}
 
   arr.each do |el|
-    case rand(10)
+    # case rand(10)
+    case rand(20)
     when 0
       el[:case] = :acronym
-    when 1
+    when 1, 2
       el[:case] = :capital
     else
       el[:case] = :downcase
@@ -230,29 +231,65 @@ def generate_single_syllable_word
   end
 
   word.map!{|el| el ? el : CONSONANTS_PROBABILITY_ARRAY.sample}
-  word = manage_i_soft(word)
-  occasionally_add_softening_sign(word)
-
-  # short_i_position = word.index(1081)
-  # if short_i_position
-  # end
+  finalize_word(word)
 end
+
+
+def finalize_word(word)
+  word = check_same_consonants(word)
+  word = manage_i_short(word)
+  occasionally_add_softening_sign(word)  
+end
+
+
+def check_same_consonants(arr)
+  arr
+end
+
 
 def occasionally_add_softening_sign(arr)
   arr
 end
 
 
-def manage_i_soft(arr)
+def manage_i_short(arr)
   arr
 end
 
 
 def add_dash(arr)
+  return arr if arr.size < 5 || arr.size > 14
+  vowel_indexes = []
+  
+  arr.each_with_index do |el, i|
+    vowel_indexes << i if VOWELS.any?(el)
+  end
+
+  dash_zone_borders = 
+    [
+     vowel_indexes[0] == 0 ? 2 : vowel_indexes[0] + 1, 
+     vowel_indexes[-1] == (arr.size-1) ? vowel_indexes[-1]-1 : vowel_indexes[-1]
+    ]
+  (dash_zone_borders[0]..dash_zone_borders[1])
+  .map{|i|
+    next if arr[i] == 1100
+
+  }
   arr
 end
 
 
 def generate_multi_syllable_word
   generate_single_syllable_word + generate_single_syllable_word
+end
+
+
+def get_no_insert_range(arr)
+  no_insert = []
+  consonants = 0
+  arr.each_with_index do |el, i|
+    VOWELS.any?(el) ? consonants = 0 : consonants += 1
+    no_insert << ((i-3)..(i+1)) if consonants == 4
+  end
+  no_insert
 end
