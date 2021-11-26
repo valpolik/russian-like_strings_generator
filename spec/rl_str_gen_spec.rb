@@ -4,7 +4,7 @@ require_relative '../app/methods'
 
 describe "get_no_insert_range" do
   it "Should correctly find 4 consonants in a row groups" do
-    1000000.times do
+    1000.times do
       word  = Array.new(12) { rand(1072..1103) }
       check = word.chunk { |el| VOWELS.any?(el) }
         .to_a
